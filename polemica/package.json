@@ -1,0 +1,16 @@
+{
+  "name": "polemica",
+  "version": "1.0.0",
+  "description": "Twitter streaming app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "correa-brian",
+  "license": "ISC",
+  "dependencies": {
+    "https": "^1.0.0",
+    "request": "^2.88.2",
+    "util": "^0.12.2"
+  }
+}
