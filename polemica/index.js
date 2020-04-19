@@ -141,9 +141,8 @@ function streamConnect(token) {
 }
 
 (async () => {
-  console.log("listening");
-  console.log("heyyyyyyy");
-  let token = "";
+  console.log("connecting");
+  let token = process.env.TOKEN;
   let currentRules, stream;
   let timeout = 0;
   //
@@ -195,5 +194,5 @@ function streamConnect(token) {
     }
   }
 
-  // connect();
+  connect();
 })();
