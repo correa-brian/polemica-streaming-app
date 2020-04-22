@@ -1,3 +1,4 @@
 .DS_Store
 docker-compose.*.yml
-polemica/node_modules/
+*/node_modules/
+*/config/log/

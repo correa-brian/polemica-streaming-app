@@ -2,6 +2,11 @@ const URL = require('url').URL;
 const https = require('https');
 const request = require('request');
 const util = require('util');
+const kafka = require('kafka-node');
+const bp = require('body-parser');
+
+const KAFKA_TOPIC = "example";
+const KAFKA_SERVER = "localhost:2181";
 
 const get = util.promisify(request.get);
 const post = util.promisify(request.post);
@@ -12,12 +17,12 @@ const consumer_secret = ''; // Add your API secret key here
 const bearerTokenURL = new URL('https://api.twitter.com/oauth2/token');
 const streamURL = new URL('https://api.twitter.com/labs/1/tweets/stream/filter');
 const rulesURL = new URL('https://api.twitter.com/labs/1/tweets/stream/filter/rules');
-
-async function sleep(delay) {
-  return new Promise((resolve) =>
-    setTimeout(() =>
-      resolve(true), delay));
-}
+//
+// async function sleep(delay) {
+//   return new Promise((resolve) =>
+//     setTimeout(() =>
+//       resolve(true), delay));
+// }
 
 async function bearerToken (auth) {
   const requestConfig = {
@@ -141,7 +146,40 @@ function streamConnect(token) {
 }
 
 (async () => {
-  console.log("connecting");
+  console.log("init Producer");
+  console.log("---------------");
+  try {
+    const client = new kafka.KafkaClient(KAFKA_SERVER);
+    const producer = new kafka.Producer(client);
+
+    const kt = "example";
+
+    let payloads = [
+      {
+        topic: kt,
+        messages: KAFKA_TOPIC + " plus my stuff here"
+      }
+    ];
+
+    producer.on('ready', async function() {
+      let push_status = producer.send(payloads, (err, data) => {
+         if (err) {
+           console.log('[kafka-producer -> '+KAFKA_TOPIC+']: broker update failed');
+         } else {
+           console.log('[kafka-producer -> '+KAFKA_TOPIC+']: broker update success');
+         }
+      });
+    });
+
+    producer.on('error', function(err) {
+      console.log(err);
+      console.log('[kafka-producer -> '+KAFKA_TOPIC+']: connection errored');
+      throw err;
+  });
+  } catch(e) {
+    console.log("Exception: ", e);
+  }
+
   let token = process.env.TOKEN;
   let currentRules, stream;
   let timeout = 0;
@@ -194,5 +232,36 @@ function streamConnect(token) {
     }
   }
 
-  connect();
+  // connect();
+})();
+
+(function runTest() {
+  console.log("init Consumer");
+  console.log("---------------");
+  try {
+  const client = new kafka.KafkaClient(KAFKA_SERVER);
+  let consumer = new kafka.Consumer(
+    client,
+    [{ topic: KAFKA_TOPIC, partition: 0 }],
+    {
+      autoCommit: true,
+      fetchMaxWaitMs: 1000,
+      fetchMaxBytes: 1024 * 1024,
+      encoding: 'utf8',
+      fromOffset: false
+    }
+  );
+  consumer.on('message', async function(message) {
+    console.log('here');
+    console.log(
+      'kafka message -> ',
+      message.value
+    );
+  })
+  consumer.on('error', function(err) {
+    console.log('error', err);
+  });
+} catch(e) {
+  console.log(e);
+  }
 })();

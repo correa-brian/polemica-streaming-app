@@ -4,12 +4,18 @@
   "description": "Twitter streaming app",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "zoo": "zookeeper-server-start config/zookeeper.properties",
+    "kafka": "kafka-server-start config/server.properties",
+    "stop": "kafka-server-stop config/server.properties && zookeeper-server-stop config/zookeeper.properties",
+    "start": "node index.js"
   },
   "author": "correa-brian",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "https": "^1.0.0",
+    "kafka-node": "^5.0.0",
     "request": "^2.88.2",
     "util": "^0.12.2"
   }
