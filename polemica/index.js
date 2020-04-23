@@ -1,7 +1,7 @@
 const Producer = require('./kafkaUtils/Producer.js');
 const Consumer = require('./kafkaUtils/Consumer.js');
 
-async function produceKafkaMessage() {
+function produceKafkaMessage() {
   let producer = new Producer(process.env.KAFKA_SERVER);
   let kafkaMsg = {
     topic: "example",
@@ -9,16 +9,12 @@ async function produceKafkaMessage() {
   };
 
   let formattedKafkaMsg = producer.buildMessage(kafkaMsg);
-  return producer.send(formattedKafkaMsg);
+  producer.send(formattedKafkaMsg);
 }
 
-function consumeKafkaMessage() {
-  let consumer =  new Consumer(process.env.KAFKA_SERVER);
-}
-
-async function main() {
+function main() {
   produceKafkaMessage();
-  consumeKafkaMessage();
+  let consumer =  new Consumer(process.env.KAFKA_SERVER);
 }
 
 main();

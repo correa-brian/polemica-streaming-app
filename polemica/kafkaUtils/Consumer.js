@@ -10,7 +10,7 @@ const consumerConfig = {
 };
 
 /**
- * Represents the Kafka Consumer`
+ * Represents the Kafka Consumer.
  */
 class Consumer {
   constructor(kafkaServer) {
