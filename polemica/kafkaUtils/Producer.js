@@ -38,11 +38,7 @@ class Producer {
    */
   buildMessage(payload) {
     return [
-      { topic: payload.topic, messages: payload.messages },
-      { topic: payload.topic, messages: "Msg 1" },
-      { topic: payload.topic, messages: "Msg 2" },
-      { topic: payload.topic, messages: "Msg 3" },
-      { topic: payload.topic, messages: "Msg 4" }
+      { topic: payload.topic, messages: payload.messages }
     ];
   }
 
