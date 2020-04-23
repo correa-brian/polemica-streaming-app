@@ -1,7 +1,7 @@
 const kafka = require('kafka-node');
 const bp = require('body-parser');
 
-const consumerConfig = {
+const CONSUMER_CONFIG = {
   autoCommit: true,
   fetchMaxWaitMs: 1000,
   fetchMaxBytes: 1024 * 1024,
@@ -18,7 +18,7 @@ class Consumer {
     this.consumer = new kafka.Consumer(
       this.client,
       [{ topic: "example", partition: 0 }],
-      consumerConfig
+      CONSUMER_CONFIG
     );
 
     this.connect();

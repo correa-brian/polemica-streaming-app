@@ -51,7 +51,7 @@ class Producer {
    *
    * @return {string, int}
    */
-  send(kafkaMessage) {
+  publish(kafkaMessage) {
     let push_status = this.producer.send(kafkaMessage, async (err, data) => {
        if (err) {
          console.log('kafka-producer -> ' + kafkaMessage[0].topic + '. Failed!');

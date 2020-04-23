@@ -1,7 +1,9 @@
 const Producer = require('./kafkaUtils/Producer.js');
 const Consumer = require('./kafkaUtils/Consumer.js');
+const TwitterClient = require('./twitterUtils/TwitterAPIClient.js');
 
-function produceKafkaMessage() {
+
+produceKafkaMessage = () => {
   let producer = new Producer(process.env.KAFKA_SERVER);
   let kafkaMsg = {
     topic: "example",
@@ -9,12 +11,14 @@ function produceKafkaMessage() {
   };
 
   let formattedKafkaMsg = producer.buildMessage(kafkaMsg);
-  producer.send(formattedKafkaMsg);
+  producer.publish(formattedKafkaMsg);
 }
 
-function main() {
-  produceKafkaMessage();
-  let consumer =  new Consumer(process.env.KAFKA_SERVER);
-}
+(main = () => {
+  // fire up kafka producer and consumer
 
-main();
+  // light up twitter api
+  let tc = new TwitterClient();
+  tc.setBearerToken();
+
+})();
