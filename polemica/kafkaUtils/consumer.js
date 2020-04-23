@@ -1,38 +1,50 @@
 const kafka = require('kafka-node');
 const bp = require('body-parser');
 
-const KAFKA_TOPIC = "example";
-const KAFKA_SERVER = "localhost:2181";
+const consumerConfig = {
+  autoCommit: true,
+  fetchMaxWaitMs: 1000,
+  fetchMaxBytes: 1024 * 1024,
+  encoding: 'utf8',
+  fromOffset: false
+};
 
-function init() {
-  console.log("init Consumer");
-  console.log("---------------");
-  try {
-    const client = new kafka.KafkaClient(KAFKA_SERVER);
-    let consumer = new kafka.Consumer(
-      client,
-      [{ topic: KAFKA_TOPIC, partition: 0 }],
-      {
-        autoCommit: true,
-        fetchMaxWaitMs: 1000,
-        fetchMaxBytes: 1024 * 1024,
-        encoding: 'utf8',
-        fromOffset: false
-      }
+/**
+ * Represents the Kafka Consumer`
+ */
+class Consumer {
+  constructor(kafkaServer) {
+    this.client = new kafka.KafkaClient(kafkaServer);
+    this.consumer = new kafka.Consumer(
+      this.client,
+      [{ topic: "example", partition: 0 }],
+      consumerConfig
     );
 
-    consumer.on('message', async function(message) {
-      console.log('here');
-      console.log(
-        'kafka message -> ',
-        message.value
-      );
-    });
+    this.connect();
+  }
 
-    consumer.on('error', function(err) {
-      console.log('error', err);
-    });
-  } catch(e) {
-    console.log(e);
+  /**
+   * Checks the message event of the Kafka connection.
+   *
+   * @return {void}
+   */
+  connect() {
+    try {
+      this.consumer.on('message', async (message) => {
+        console.log(
+          'kafka message -> ',
+          message.value
+        );
+      });
+
+      this.consumer.on('error', (err) => {
+        throw err;
+      });
+    } catch(e) {
+      console.log("Exception: ", e);
+    }
   }
 }
+
+module.exports = Consumer;
