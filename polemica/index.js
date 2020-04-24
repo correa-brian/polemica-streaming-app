@@ -36,3 +36,9 @@ const initUserInput = () => {
     producer.publish(formattedKafkaMsg);
   });
 })();
+
+// TODO:
+//   - set up twitter stream
+//   - set up twitter stream query
+//   - configure streaming params
+//   - place twitter messages onto kafka
