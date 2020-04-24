@@ -32,10 +32,8 @@ class Consumer {
   connect() {
     try {
       this.consumer.on('message', async (message) => {
-        console.log(
-          'kafka message -> ',
-          message.value
-        );
+        let messageContents = JSON.parse(message.value);
+        console.log(messageContents);
       });
 
       this.consumer.on('error', (err) => {

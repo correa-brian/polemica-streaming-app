@@ -27,9 +27,11 @@ const initUserInput = () => {
         process.exit();
     }
 
+    let obj = { userInput: data};
+
     let kafkaMsg = {
       topic: "example",
-      messages: data
+      messages: JSON.stringify(obj)
     };
 
     let formattedKafkaMsg = producer.buildMessage(kafkaMsg);
