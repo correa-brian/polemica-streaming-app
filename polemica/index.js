@@ -10,6 +10,29 @@ const initUserInput = () => {
   return standard_input;
 }
 
+const publishInputToKafka = (data, producer) => {
+  if (data === 'exit\n') {
+      console.log("User input complete, program exit.");
+      process.exit();
+  }
+
+  let obj = { userInput: data};
+
+  let kafkaMsg = {
+    topic: "example",
+    messages: JSON.stringify(obj)
+  };
+
+  let formattedKafkaMsg = producer.buildMessage(kafkaMsg);
+  producer.publish(formattedKafkaMsg);
+}
+
+const testSetup = (producer) => {
+  let userInput = initUserInput();
+  userInput.on('data', (data, producer) => {
+    publishInputToKafka(data, producer);
+  });
+}
 
 (async () => {
   // fire up kafka producer and consumer
@@ -22,8 +45,14 @@ const initUserInput = () => {
   tc.init().then(() => {
       tc.listenToStream();
       tc.stream.on('data', (data) => {
-        // do something with the twitter payload
-        // TODO: place twitter messages onto kafka
+        let out = tc.handleData(data);
+        let kafkaMsg = {
+          topic: "twitterPOC",
+          messages: JSON.stringify(out)
+        }
+
+        let formattedKafkaMsg = producer.buildMessage(kafkaMsg);
+        producer.publish(formattedKafkaMsg);
       })
       .on('error', error => {
         if (error.code === 'ESOCKETTIMEDOUT') {
@@ -34,23 +63,4 @@ const initUserInput = () => {
         tc.handleTimeout();
       });
   });
-
-  // @HereForTesting
-  // let userInput = initUserInput();
-  // userInput.on('data', (data) => {
-  //   if (data === 'exit\n') {
-  //       console.log("User input complete, program exit.");
-  //       process.exit();
-  //   }
-  //
-  //   let obj = { userInput: data};
-  //
-  //   let kafkaMsg = {
-  //     topic: "example",
-  //     messages: JSON.stringify(obj)
-  //   };
-  //
-  //   let formattedKafkaMsg = producer.buildMessage(kafkaMsg);
-  //   producer.publish(formattedKafkaMsg);
-  // });
 })();
