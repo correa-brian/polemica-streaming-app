@@ -26,6 +26,7 @@ class TwitterAPIClient {
   constructor() {
     this.timeout = 0;
     this.bearerToken;
+    this.stream;
   }
 
   /**
@@ -33,7 +34,7 @@ class TwitterAPIClient {
   *
   * @return {void}
   */
-  async setBearerToken() {
+  async init() {
     try {
       const token = await this.requestBearerToken({consumer_key, consumer_secret});
       this.bearerToken = token;
@@ -70,11 +71,11 @@ class TwitterAPIClient {
     return JSON.parse(response.body).access_token;
   }
 
-  async getAllRules(token) {
+  async getAllRules() {
     const requestConfig = {
       url: rulesURL,
       auth: {
-        bearer: token
+        bearer: this.bearerToken
       }
     };
 
@@ -135,6 +136,42 @@ class TwitterAPIClient {
     return response.body;
   }
 
+  streamConnect() {
+    const config = {
+      url: 'https://api.twitter.com/labs/1/tweets/stream/filter?format=detailed&tweet.format=detailed',
+      auth: {
+        bearer: this.bearerToken,
+      },
+      timeout: 20000,
+    };
+
+    return request.get(config);;
+  }
+
+  handleData(data) {
+    try {
+      const json = JSON.parse(data);
+      console.log(json);
+      if (json.connection_issue) {
+        stream.emit('timeout');
+      }
+
+      return json;
+    } catch (e) {
+      console.log("Streaming error: ", e);
+      // Heartbeat received. Do nothing.
+    }
+  }
+
+  async handleTimeout() {
+    // Reconnect on error
+    console.warn('A connection error occurred. Reconnecting…');
+    this.timeout++;
+    this.stream.abort();
+    await this.sleep((2 ** this.timeout) * 1000);
+    this.listenToStream();
+  }
+
   /**
   * Listen to the stream.
   * This reconnection logic will attempt to reconnect when a disconnection is detected.
@@ -142,19 +179,13 @@ class TwitterAPIClient {
   *
   * @return {void}
   */
-  async listenToStream() {
+  listenToStream() {
     try {
-      stream = this.streamConnect(token);
-      stream.on('timeout', async () => {
-        // Reconnect on error
-        console.warn('A connection error occurred. Reconnecting…');
-        this.timeout++;
-        stream.abort();
-        await this.sleep((2 ** this.timeout) * 1000);
-        listenToStream();
-      });
+      this.stream = this.streamConnect();
+      return;
     } catch (e) {
-      listenToStream();
+      console.log("eee", e);
+      this.listenToStream();
     }
   }
 
@@ -162,36 +193,6 @@ class TwitterAPIClient {
     return new Promise((resolve) =>
       setTimeout(() =>
         resolve(true), delay));
-  }
-
-  async streamConnect(token) {
-    const config = {
-      url: 'https://api.twitter.com/labs/1/tweets/stream/filter?format=detailed&tweet.format=detailed',
-      auth: {
-        bearer: this.token,
-      },
-      timeout: 20000,
-    };
-
-    const stream = request.get(config);
-    stream.on('data', data => {
-        try {
-          const json = JSON.parse(data);
-          console.log(json);
-          if (json.connection_issue) {
-            stream.emit('timeout');
-          }
-        } catch (e) {
-          // Heartbeat received. Do nothing.
-        }
-
-    }).on('error', error => {
-      if (error.code === 'ESOCKETTIMEDOUT') {
-        stream.emit('timeout');
-      }
-    });
-
-    return stream;
   }
 }
 
