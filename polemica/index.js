@@ -40,7 +40,7 @@ const testSetup = (producer) => {
   let consumer = new Consumer(process.env.KAFKA_SERVER);
 
   // light up twitter api
-  let stream;
+  // let stream;
   let tc = new TwitterClient();
   tc.init().then(() => {
       tc.listenToStream();

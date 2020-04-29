@@ -1,5 +1,6 @@
 .env
 .DS_Store
 docker-compose.*.yml
+
+full-stack/
 */node_modules/
-*/config/log/

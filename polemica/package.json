@@ -5,9 +5,6 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "zoo": "zookeeper-server-start config/zookeeper.properties",
-    "kafka": "kafka-server-start config/server.properties",
-    "stop": "kafka-server-stop config/server.properties && zookeeper-server-stop config/zookeeper.properties",
     "start": "node index.js"
   },
   "author": "correa-brian",
